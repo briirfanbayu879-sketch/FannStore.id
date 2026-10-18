@@ -175,7 +175,7 @@ function closeModal(){modal.classList.remove('show')}document.getElementById('cl
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (()=>{
- const cfg={url:'PASTE_SUPABASE_PROJECT_URL_HERE',publishableKey:'PASTE_SUPABASE_PUBLISHABLE_KEY_HERE'};
+ const cfg={url:'https://mexpeiaxzgxfchuegliu.supabase.co',publishableKey:'Psb_publishable_wSEcHIrwGRRZsZJS6pODPA_rjehi0Wf'};
  const $=id=>document.getElementById(id);let mode='login';
  function showView(){const hash=location.hash;const acct=hash==='#akun';const status=hash==='#status-pesanan';$('fs-account-view').classList.toggle('active',acct);$('fs-status-view').classList.toggle('active',status);if(acct||status){document.querySelectorAll('body > .wrap, body > header, body > main, body > section, body > footer').forEach(el=>{if(!el.classList.contains('fs-extra-view'))el.dataset.fsWasHidden=el.hidden?'1':'0';if(!el.classList.contains('fs-extra-view'))el.hidden=true});$('fs-'+(acct?'account':'status')+'-view').scrollIntoView({behavior:'smooth',block:'start'});}else{document.querySelectorAll('[data-fs-was-hidden]').forEach(el=>{el.hidden=el.dataset.fsWasHidden==='1';delete el.dataset.fsWasHidden});}}
  function setMode(m){mode=m;$('fs-account-heading').textContent=m==='login'?'Masuk ke akun':'Buat akun baru';$('fs-account-submit').textContent=m==='login'?'Masuk':'Daftar akun';$('fs-account-password').autocomplete=m==='login'?'current-password':'new-password';$('fs-account-msg').textContent=m==='login'?'Masuk dengan email dan password akun kamu.':'Daftar dengan email dan password. Jika konfirmasi email aktif, periksa email untuk verifikasi.'}
