@@ -50,6 +50,36 @@ body.admin-view #adminPanel .checkout-recap{min-height:60vh}
 #adminNavLink[hidden]{display:none!important}
 @media(max-width:760px){body.admin-view #adminPanel{padding-top:16px}}
 </style>
+
+<style id="qris-payment-layout-fix">
+/* QRIS: tampilan pembayaran khusus, bisa digulir di laptop dan HP */
+#modal:has(.checkout-recap h3){
+  position:fixed; inset:0; z-index:1000; display:none; place-items:stretch;
+  padding:0; overflow:hidden; overscroll-behavior:contain;
+}
+#modal.show:has(.checkout-recap h3){display:grid}
+#modal:has(.checkout-recap h3) .modalbox{
+  width:100%; height:100%; max-width:none; max-height:100%; min-height:0;
+  margin:0; padding:22px clamp(16px,4vw,56px) 32px; border:0; border-radius:0;
+  overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch; scrollbar-gutter:stable;
+  background:radial-gradient(ellipse at 85% 0%,#29205c 0,transparent 42%),#0b1022;
+}
+#modal:has(.checkout-recap h3) .modalbox #modalText{width:100%; max-width:680px; margin:18px auto 0}
+#modal:has(.checkout-recap h3) .modalbox #modalTitle{max-width:680px; margin:12px auto; font-size:clamp(25px,3vw,36px)}
+#modal:has(.checkout-recap h3) .modalbox>.tag{display:block; width:max-content; max-width:100%; margin:0 auto}
+#modal:has(.checkout-recap h3) .modalbox>.close{position:sticky; top:0; z-index:5; float:right; margin-bottom:-40px}
+#modal:has(.checkout-recap h3) .checkout-recap{overflow:visible; margin:16px auto; padding:clamp(14px,3vw,24px)}
+#modal:has(.checkout-recap h3) .checkout-recap img{width:min(100%,360px)!important; max-height:none; object-fit:contain}
+#modal:has(.checkout-recap h3) .checkout-line{align-items:flex-start; flex-wrap:wrap}
+#modal:has(.checkout-recap h3) .checkout-line strong{max-width:100%; overflow-wrap:anywhere}
+#modal:has(.checkout-recap h3) .checkout-submit{margin-bottom:12px}
+@media(max-width:600px){
+  #modal:has(.checkout-recap h3) .modalbox{padding:16px 12px 28px}
+  #modal:has(.checkout-recap h3) .modalbox #modalText{margin-top:14px}
+  #modal:has(.checkout-recap h3) .checkout-recap img{width:min(100%,320px)!important}
+}
+</style>
 </head><body>
 <header class="nav"><div class="wrap navin"><a class="brand" href="#beranda"><span class="logo" aria-label="FannStore diamond logo"><svg viewBox="0 0 48 48" role="img" aria-hidden="true"><defs><linearGradient id="gemTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#9deaff"/></linearGradient><linearGradient id="gemLeft" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9b7ff"/><stop offset="1" stop-color="#7a5cff"/></linearGradient><linearGradient id="gemRight" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#70efff"/><stop offset="1" stop-color="#4382ff"/></linearGradient></defs><path class="gem-glow" d="M24 3 44 20 24 45 4 20Z"/><path d="M13 7H35L44 20H4Z" fill="url(#gemTop)"/><path d="M4 20 13 7 24 20 24 45Z" fill="url(#gemLeft)"/><path d="M24 20 35 7 44 20 24 45Z" fill="url(#gemRight)"/><path d="M13 7 24 20 35 7" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.5"/><path d="M4 20H44" stroke="#fff" stroke-opacity=".7" stroke-width="1.5"/></svg></span><span>FannStore.id</span></a><nav class="links"><a href="#beranda">Beranda</a><a href="#topup">Top Up</a><a href="#game">Game</a><a href="#promo">Promo</a><a href="#bantuan">Bantuan</a><a href="#status-pesanan">Status Pesanan</a><a href="#promo-live">Voucher</a><a id="adminNavLink" href="#dashboard-admin" hidden>Dashboard Admin</a></nav><div style="display:flex;gap:8px;align-items:center"><a class="btn ghost" href="#game">Jelajahi Game ↗</a><a id="openAdminBtn" href="#akun" aria-label="Masuk atau daftar akun" style="border:0;background:transparent;color:#c9c3ff;font:inherit;font-size:12px;font-weight:600;padding:6px 2px;cursor:pointer;text-decoration:none;white-space:nowrap">Masuk / Daftar</a></div></div></header>
 <main><section class="wrap" id="promo-live" style="padding-top:24px">
