@@ -29,12 +29,12 @@
 <style id="checkout-wide-view">
 /* Checkout dibuka sebagai tampilan penuh, bukan modal kecil */
 #modal:has(.checkout-head), #modal:has(.checkout-recap h3){padding:0;place-items:stretch;overflow:hidden}
-#modal:has(.checkout-head) .modalbox{width:100%;height:100%;max-width:none;max-height:100vh;overflow:auto;border-radius:0;padding:24px clamp(16px,4vw,64px);border:0;background:radial-gradient(ellipse at 85% 0%,#29205c 0,transparent 42%),#0b1022}
-#modal:has(.checkout-head) .modalbox #modalText{width:100%;max-width:1500px;margin:18px auto 0}
+#modal:has(.checkout-head) .modalbox, #modal:has(.checkout-payment-page) .modalbox{width:100%;height:100%;max-width:none;max-height:100vh;overflow:auto;border-radius:0;padding:24px clamp(16px,4vw,64px);border:0;background:radial-gradient(ellipse at 85% 0%,#29205c 0,transparent 42%),#0b1022}
+#modal:has(.checkout-head) .modalbox #modalText, #modal:has(.checkout-payment-page) .modalbox #modalText{width:100%;max-width:1500px;margin:18px auto 0}
 #modal:has(.checkout-head) .modalbox .checkout-head{max-width:1500px;margin:0 auto 18px}
-#modal:has(.checkout-head) .modalbox #modalTitle{max-width:1500px;margin:10px auto;font-size:clamp(26px,3vw,38px)}
-#modal:has(.checkout-head) .modalbox>.tag{display:block;width:max-content;margin:0 auto;max-width:1500px}
-#modal:has(.checkout-head) .modalbox>.close{position:sticky;top:0;z-index:5;float:right;margin-bottom:-40px;background:#201943;border-color:#6554a5}
+#modal:has(.checkout-head) .modalbox #modalTitle, #modal:has(.checkout-payment-page) .modalbox #modalTitle{max-width:1500px;margin:10px auto;font-size:clamp(26px,3vw,38px)}
+#modal:has(.checkout-head) .modalbox>.tag, #modal:has(.checkout-payment-page) .modalbox>.tag{display:none}
+#modal:has(.checkout-head) .modalbox>.close, #modal:has(.checkout-payment-page) .modalbox>.close{position:sticky;top:0;z-index:5;float:right;margin-bottom:-40px;background:#201943;border-color:#6554a5}
 #modal:has(.checkout-head) .modalbox #modalText>div[style*="grid-template-columns"]{grid-template-columns:minmax(0,1.8fr) minmax(280px,.8fr)!important;gap:24px!important}
 #modal:has(.checkout-head) .modalbox .checkout-section-title{margin-top:20px}
 #modal:has(.checkout-head) .modalbox .price-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -51,34 +51,27 @@ body.admin-view #adminPanel .checkout-recap{min-height:60vh}
 @media(max-width:760px){body.admin-view #adminPanel{padding-top:16px}}
 </style>
 
-<style id="qris-payment-layout-fix">
-/* QRIS: tampilan pembayaran khusus, bisa digulir di laptop dan HP */
-#modal:has(.checkout-recap h3){
-  position:fixed; inset:0; z-index:1000; display:none; place-items:stretch;
-  padding:0; overflow:hidden; overscroll-behavior:contain;
-}
-#modal.show:has(.checkout-recap h3){display:grid}
-#modal:has(.checkout-recap h3) .modalbox{
-  width:100%; height:100%; max-width:none; max-height:100%; min-height:0;
-  margin:0; padding:22px clamp(16px,4vw,56px) 32px; border:0; border-radius:0;
-  overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch; scrollbar-gutter:stable;
-  background:radial-gradient(ellipse at 85% 0%,#29205c 0,transparent 42%),#0b1022;
-}
-#modal:has(.checkout-recap h3) .modalbox #modalText{width:100%; max-width:680px; margin:18px auto 0}
-#modal:has(.checkout-recap h3) .modalbox #modalTitle{max-width:680px; margin:12px auto; font-size:clamp(25px,3vw,36px)}
-#modal:has(.checkout-recap h3) .modalbox>.tag{display:block; width:max-content; max-width:100%; margin:0 auto}
-#modal:has(.checkout-recap h3) .modalbox>.close{position:sticky; top:0; z-index:5; float:right; margin-bottom:-40px}
-#modal:has(.checkout-recap h3) .checkout-recap{overflow:visible; margin:16px auto; padding:clamp(14px,3vw,24px)}
-#modal:has(.checkout-recap h3) .checkout-recap img{width:min(100%,360px)!important; max-height:none; object-fit:contain}
-#modal:has(.checkout-recap h3) .checkout-line{align-items:flex-start; flex-wrap:wrap}
-#modal:has(.checkout-recap h3) .checkout-line strong{max-width:100%; overflow-wrap:anywhere}
-#modal:has(.checkout-recap h3) .checkout-submit{margin-bottom:12px}
-@media(max-width:600px){
-  #modal:has(.checkout-recap h3) .modalbox{padding:16px 12px 28px}
-  #modal:has(.checkout-recap h3) .modalbox #modalText{margin-top:14px}
-  #modal:has(.checkout-recap h3) .checkout-recap img{width:min(100%,320px)!important}
-}
+<style id="qris-payment-page-style">
+#modal:has(.checkout-payment-page){padding:0;place-items:stretch;overflow:hidden}
+#modal:has(.checkout-payment-page) .modalbox{border-radius:0;border:0;background:radial-gradient(ellipse at 90% 0%,#2a205d 0,transparent 42%),#0b1022;padding:22px clamp(14px,4vw,60px);box-shadow:none}
+#modal:has(.checkout-payment-page) .modalbox #modalTitle{padding-top:10px;color:#f7f7ff}
+.checkout-payment-page{max-width:1500px;margin:0 auto;color:#f3f5ff;overflow-wrap:anywhere}
+.payment-status{display:flex;align-items:center;gap:14px;padding:17px 20px;margin-bottom:20px;border:1px solid #6251a3;border-radius:16px;background:linear-gradient(110deg,#211849,#111a34)}
+.payment-status-icon{display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;border-radius:50%;background:#3a2a72;color:#c9bcff;font-size:27px}
+.payment-status strong,.payment-status small{display:block}.payment-status strong{font-size:18px}.payment-status small{color:#b9c5e7;margin-top:4px;line-height:1.45}
+.payment-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.85fr);gap:20px;align-items:start}
+.payment-panel{min-width:0;border:1px solid #343d68;border-radius:18px;padding:22px;background:#11182d}
+.payment-panel h3,.payment-instructions h3{margin:0 0 12px;font-size:19px;color:#f7f7ff}.payment-muted{color:#b7c3e5;font-size:13px;line-height:1.6;margin:0 0 16px}
+.payment-qr-image{display:block;width:min(100%,390px);max-height:390px;object-fit:contain;box-sizing:border-box;margin:14px auto 18px;padding:14px;background:#fff;border-radius:14px}.payment-qr-image.qr-image-error{display:none}
+.payment-qr-unavailable{padding:24px;border:1px dashed #51467c;border-radius:12px;color:#c5cde5;line-height:1.5;text-align:center}
+.payment-qr-actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.payment-qr-actions .btn{flex:1;min-width:140px;text-align:center;justify-content:center}
+.payment-primary{background:linear-gradient(110deg,#713ff0,#3d66f5);color:white;border:0}.payment-secondary{display:inline-flex;align-items:center;justify-content:center;border:1px solid #6257a1;background:#201a43;color:#e5e1ff;text-decoration:none}
+.payment-code-label{display:grid;gap:8px;color:#cbd2ed;font-size:13px;font-weight:700;margin-top:18px}.payment-code{display:block;box-sizing:border-box;width:100%;min-height:105px;resize:vertical;padding:12px;border:1px solid #45436f;border-radius:10px;background:#090e20;color:#f5f5ff;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
+.payment-invoice{display:grid;gap:6px;padding:12px 0;border-bottom:1px solid #2b3455}.payment-invoice span,.payment-amount span{color:#aeb9d9;font-size:13px}.payment-invoice strong{font-size:14px;overflow-wrap:anywhere}.payment-amount{display:grid;gap:6px;padding:18px 0;border-bottom:1px solid #2b3455}.payment-amount strong{font-size:30px;color:#75e4ff;letter-spacing:-.5px}
+.payment-account-info{padding:18px 0 10px}.payment-account-info h4{margin:0 0 12px;font-size:16px}.payment-info-row{display:flex;justify-content:space-between;gap:18px;padding:8px 0;font-size:13px}.payment-info-row span{color:#b5c0df;flex:0 0 38%}.payment-info-row strong{text-align:right;overflow-wrap:anywhere}.payment-status-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #2b3455;padding:16px 0}.payment-status-row span{color:#c0c9e4;font-size:13px}.payment-status-row strong{padding:6px 10px;border-radius:8px;background:#5b4314;color:#ffe18b;font-size:11px;letter-spacing:.4px}.payment-expiry{font-size:12px;color:#c5cde5;margin:0 0 12px}.payment-sandbox-note{margin:10px 0 0;padding:12px;border-radius:10px;background:#211b3d;color:#bfc8e6;font-size:11px;line-height:1.55}
+.payment-instructions{margin-top:20px;padding:20px 22px;border:1px solid #343d68;border-radius:16px;background:#0e1528}.payment-instructions ol{padding-left:22px;margin:8px 0 0;color:#c3cce7;line-height:1.8;font-size:13px}.payment-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:18px 0 6px;padding-bottom:16px}.payment-footer p{color:#aeb9d9;font-size:12px;line-height:1.5}.payment-done{min-width:180px}
+@media(max-width:800px){#modal:has(.checkout-payment-page) .modalbox{padding:16px 12px}.payment-layout{grid-template-columns:minmax(0,1fr);gap:12px}.payment-panel{padding:16px}.payment-qr-image{width:min(100%,330px);max-height:330px}.payment-status{padding:14px}.payment-status strong{font-size:16px}.payment-amount strong{font-size:26px}.payment-footer{align-items:stretch;flex-direction:column}.payment-done{width:100%}.payment-instructions{padding:16px}}
+@media(max-width:420px){.payment-info-row{gap:10px}.payment-info-row span{flex-basis:34%}.payment-qr-actions{flex-direction:column}.payment-qr-actions .btn{width:100%}}
 </style>
 </head><body>
 <header class="nav"><div class="wrap navin"><a class="brand" href="#beranda"><span class="logo" aria-label="FannStore diamond logo"><svg viewBox="0 0 48 48" role="img" aria-hidden="true"><defs><linearGradient id="gemTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#9deaff"/></linearGradient><linearGradient id="gemLeft" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9b7ff"/><stop offset="1" stop-color="#7a5cff"/></linearGradient><linearGradient id="gemRight" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#70efff"/><stop offset="1" stop-color="#4382ff"/></linearGradient></defs><path class="gem-glow" d="M24 3 44 20 24 45 4 20Z"/><path d="M13 7H35L44 20H4Z" fill="url(#gemTop)"/><path d="M4 20 13 7 24 20 24 45Z" fill="url(#gemLeft)"/><path d="M24 20 35 7 44 20 24 45Z" fill="url(#gemRight)"/><path d="M13 7 24 20 35 7" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.5"/><path d="M4 20H44" stroke="#fff" stroke-opacity=".7" stroke-width="1.5"/></svg></span><span>FannStore.id</span></a><nav class="links"><a href="#beranda">Beranda</a><a href="#topup">Top Up</a><a href="#game">Game</a><a href="#promo">Promo</a><a href="#bantuan">Bantuan</a><a href="#status-pesanan">Status Pesanan</a><a href="#promo-live">Voucher</a><a id="adminNavLink" href="#dashboard-admin" hidden>Dashboard Admin</a></nav><div style="display:flex;gap:8px;align-items:center"><a class="btn ghost" href="#game">Jelajahi Game ↗</a><a id="openAdminBtn" href="#akun" aria-label="Masuk atau daftar akun" style="border:0;background:transparent;color:#c9c3ff;font:inherit;font-size:12px;font-weight:600;padding:6px 2px;cursor:pointer;text-decoration:none;white-space:nowrap">Masuk / Daftar</a></div></div></header>
@@ -183,19 +176,32 @@ function openDetail(item){
    const {data,error}=await client.functions.invoke('create-payment',{body:{product_id:chosen.productId,quantity:qty,player_id:player,server_id:server,customer_email:inputs.email.value.trim(),customer_whatsapp:wa}});
    if(error){let detail=error.message||'Permintaan pembayaran gagal.';try{const context=error.context;if(context?.json){const j=await context.json();detail=j.detail||j.error||detail;}}catch{}throw new Error(detail);}
    if(!data||data.error)throw new Error(data?.detail||data?.error||'Tagihan QRIS tidak berhasil dibuat.');
-   modalTitle.textContent='Pembayaran QRIS';modalText.replaceChildren();
-   const result=document.createElement('div');result.className='checkout-recap';
-   const title=document.createElement('h3');title.textContent='Tagihan berhasil dibuat';result.appendChild(title);
-   const addLine=(label,value)=>{const row=document.createElement('div');row.className='checkout-line';const a=document.createElement('span'),b=document.createElement('strong');a.textContent=label;b.textContent=value;row.append(a,b);result.appendChild(row)};
-   addLine('Kode pesanan',String(data.order_code||'—'));
-   addLine('Total pembayaran',money(Number(data.total_amount||0)));
-   addLine('Status','Menunggu pembayaran');
-   const note=document.createElement('p');note.style.cssText='font-size:12px;color:#b9c5e7;line-height:1.5';note.textContent='Mode Sandbox untuk pengujian. Jangan mengirim barang/top-up sampai pembayaran terverifikasi melalui notifikasi Midtrans.';result.appendChild(note);
-   if(data.qr_code_url){const qrLink=document.createElement('a');qrLink.href=data.qr_code_url;qrLink.target='_blank';qrLink.rel='noopener noreferrer';qrLink.textContent='Buka QRIS di tab baru';qrLink.style.cssText='display:block;margin:12px 0;color:#9be8ff;text-decoration:underline';result.appendChild(qrLink);const img=document.createElement('img');img.src=data.qr_code_url;img.alt='QRIS untuk pesanan '+String(data.order_code||'');img.style.cssText='display:block;width:min(100%,320px);height:auto;margin:12px auto;background:white;border-radius:12px;padding:10px';img.onerror=()=>{img.remove();};result.appendChild(img);}
-   if(data.qr_string){const label=document.createElement('label');label.textContent='Kode QRIS (jika aplikasi mendukung tempel kode)';label.style.cssText='display:block;margin-top:12px;color:#ddd6ff';const area=document.createElement('textarea');area.readOnly=true;area.value=String(data.qr_string);area.style.cssText='display:block;box-sizing:border-box;width:100%;min-height:90px;margin-top:6px;padding:10px;border-radius:8px;background:#111025;color:white';label.appendChild(area);result.appendChild(label);}
-   if(data.expiry_time)addLine('Batas waktu',new Date(data.expiry_time).toLocaleString('id-ID'));
-   const help=document.createElement('p');help.className='detail-hint';help.textContent='Simpan kode pesanan. Status ini belum berarti pembayaran berhasil.';result.appendChild(help);
-   const close=document.createElement('button');close.type='button';close.className='btn checkout-submit';close.textContent='Selesai';close.addEventListener('click',()=>{modal.classList.remove('show')});modalText.append(result,close);
+   modalTitle.textContent='Selesaikan Pembayaran';modalText.replaceChildren();
+   const result=document.createElement('div');result.className='checkout-payment-page';
+   const status=document.createElement('div');status.className='payment-status';status.innerHTML='<span class="payment-status-icon">◷</span><div><strong>Menunggu Pembayaran</strong><small>Selesaikan pembayaran sebelum batas waktu berakhir.</small></div>';result.appendChild(status);
+   const layout=document.createElement('div');layout.className='payment-layout';result.appendChild(layout);
+   const qrPanel=document.createElement('section');qrPanel.className='payment-panel payment-qr-panel';layout.appendChild(qrPanel);
+   const qrHeading=document.createElement('h3');qrHeading.textContent='Scan QRIS untuk membayar';qrPanel.appendChild(qrHeading);
+   const qrHint=document.createElement('p');qrHint.className='payment-muted';qrHint.textContent='Buka aplikasi mobile banking atau e-wallet yang mendukung QRIS, lalu scan kode ini dari perangkat lain. Jika memakai HP yang sama, simpan QR terlebih dahulu atau gunakan fitur impor gambar QR di aplikasi pembayaran jika tersedia.';qrPanel.appendChild(qrHint);
+   let qrImage=null,qrArea=null;
+   if(data.qr_code_url){qrImage=document.createElement('img');qrImage.className='payment-qr-image';qrImage.src=String(data.qr_code_url);qrImage.alt='Kode QRIS pembayaran '+String(data.order_code||'');qrImage.onerror=()=>{qrImage?.classList.add('qr-image-error');};qrPanel.appendChild(qrImage);}
+   else {const noQr=document.createElement('div');noQr.className='payment-qr-unavailable';noQr.textContent='Gambar QR belum tersedia dari penyedia pembayaran. Gunakan kode QRIS di bawah jika tersedia.';qrPanel.appendChild(noQr);}
+   const qrActions=document.createElement('div');qrActions.className='payment-qr-actions';qrPanel.appendChild(qrActions);
+   if(data.qr_code_url){const openImage=document.createElement('a');openImage.className='btn payment-secondary';openImage.href=String(data.qr_code_url);openImage.target='_blank';openImage.rel='noopener noreferrer';openImage.textContent='Buka gambar QR';qrActions.appendChild(openImage);}
+   if(data.qr_string){const copyBtn=document.createElement('button');copyBtn.type='button';copyBtn.className='btn payment-primary';copyBtn.textContent='Salin kode QRIS';copyBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(String(data.qr_string));copyBtn.textContent='Kode QRIS tersalin ✓';}catch{qrArea?.focus();qrArea?.select();try{document.execCommand('copy');copyBtn.textContent='Kode QRIS tersalin ✓';}catch{copyBtn.textContent='Pilih kode lalu salin';}}});qrActions.appendChild(copyBtn);}
+   if(data.qr_string){const codeLabel=document.createElement('label');codeLabel.className='payment-code-label';codeLabel.textContent='Kode QRIS (untuk aplikasi yang mendukung tempel kode)';const area=document.createElement('textarea');qrArea=area;area.className='payment-code';area.readOnly=true;area.value=String(data.qr_string);area.setAttribute('aria-label','Kode QRIS');codeLabel.appendChild(area);qrPanel.appendChild(codeLabel);}
+   const summary=document.createElement('section');summary.className='payment-panel payment-summary';layout.appendChild(summary);
+   const summaryTitle=document.createElement('h3');summaryTitle.textContent='Ringkasan Transaksi';summary.appendChild(summaryTitle);
+   const invoice=document.createElement('div');invoice.className='payment-invoice';invoice.innerHTML='<span>Nomor pesanan</span>';const invoiceValue=document.createElement('strong');invoiceValue.textContent=String(data.order_code||'—');invoice.appendChild(invoiceValue);summary.appendChild(invoice);
+   const amount=document.createElement('div');amount.className='payment-amount';amount.innerHTML='<span>Total Pembayaran</span>';const amountValue=document.createElement('strong');amountValue.textContent=money(Number(data.total_amount||0));amount.appendChild(amountValue);summary.appendChild(amount);
+   const info=document.createElement('div');info.className='payment-account-info';const infoTitle=document.createElement('h4');infoTitle.textContent='Informasi Akun';info.appendChild(infoTitle);
+   const infoRow=(label,value)=>{const row=document.createElement('div');row.className='payment-info-row';const l=document.createElement('span');l.textContent=label;const v=document.createElement('strong');v.textContent=value||'—';row.append(l,v);info.appendChild(row);};
+   infoRow('Game',String(item.name||'—'));infoRow('Paket',String(chosen?.label||'—'));infoRow('ID pemain',player);if(server)infoRow('Server',server);infoRow('Jumlah',String(qty)+'x');infoRow('Metode pembayaran','QRIS');summary.appendChild(info);
+   const paymentStatus=document.createElement('div');paymentStatus.className='payment-status-row';paymentStatus.innerHTML='<span>Status Pembayaran</span><strong>MENUNGGU</strong>';summary.appendChild(paymentStatus);
+   if(data.expiry_time){const expiry=document.createElement('div');expiry.className='payment-expiry';expiry.textContent='Batas waktu: '+new Date(data.expiry_time).toLocaleString('id-ID');summary.appendChild(expiry);}
+   const note=document.createElement('p');note.className='payment-sandbox-note';note.textContent='Mode Sandbox untuk pengujian. Pesanan belum lunas sampai status pembayaran terverifikasi melalui notifikasi Midtrans. Jangan mengirim barang/top-up sebelum pembayaran berhasil.';summary.appendChild(note);
+   const instructions=document.createElement('section');instructions.className='payment-instructions';instructions.innerHTML='<h3>Cara membayar</h3><ol><li>Buka aplikasi mobile banking atau e-wallet yang mendukung QRIS.</li><li>Pilih menu Scan QRIS dan arahkan ke kode di atas.</li><li>Pastikan nominal sesuai, lalu konfirmasi pembayaran di aplikasi.</li><li>Kembali ke halaman ini dan tunggu status pembayaran diverifikasi.</li></ol>';result.appendChild(instructions);
+   const footer=document.createElement('div');footer.className='payment-footer';const help=document.createElement('p');help.textContent='Simpan nomor pesanan jika perlu mengecek transaksi nanti.';footer.appendChild(help);const close=document.createElement('button');close.type='button';close.className='btn checkout-submit payment-done';close.textContent='Selesai';close.addEventListener('click',()=>{modal.classList.remove('show')});footer.appendChild(close);result.appendChild(footer);modalText.appendChild(result);
   }catch(err){console.error('Checkout QRIS gagal:',err);alert('Gagal membuat tagihan QRIS: '+(err?.message||'Kesalahan tidak diketahui'));}
   finally{submitBtn.disabled=false;submitBtn.textContent='Buat Tagihan QRIS →';}
  });
