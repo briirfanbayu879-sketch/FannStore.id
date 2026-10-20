@@ -62,7 +62,7 @@ body.admin-view #adminPanel .checkout-recap{min-height:60vh}
 .payment-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.85fr);gap:20px;align-items:start}
 .payment-panel{min-width:0;border:1px solid #343d68;border-radius:18px;padding:22px;background:#11182d}
 .payment-panel h3,.payment-instructions h3{margin:0 0 12px;font-size:19px;color:#f7f7ff}.payment-muted{color:#b7c3e5;font-size:13px;line-height:1.6;margin:0 0 16px}
-.payment-qr-image{display:block;width:min(100%,390px);max-height:390px;object-fit:contain;box-sizing:border-box;margin:14px auto 18px;padding:14px;background:#fff;border-radius:14px}.payment-qr-image.qr-image-error{display:none}
+.payment-qr-image{display:block;width:min(100%,390px);max-height:390px;object-fit:contain;box-sizing:border-box;margin:14px auto 18px;padding:14px;background:#fff;border-radius:14px}.payment-qr-loading{margin:10px 0;color:#777;text-align:center;font-size:13px}.payment-qr-loading[hidden]{display:none}
 .payment-qr-unavailable{padding:24px;border:1px dashed #51467c;border-radius:12px;color:#c5cde5;line-height:1.5;text-align:center}
 .payment-qr-actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.payment-qr-actions .btn{flex:1;min-width:140px;text-align:center;justify-content:center}
 .payment-primary{background:linear-gradient(110deg,#713ff0,#3d66f5);color:white;border:0}.payment-secondary{display:inline-flex;align-items:center;justify-content:center;border:1px solid #6257a1;background:#201a43;color:#e5e1ff;text-decoration:none}
@@ -184,7 +184,17 @@ function openDetail(item){
    const qrHeading=document.createElement('h3');qrHeading.textContent='Scan QRIS untuk membayar';qrPanel.appendChild(qrHeading);
    const qrHint=document.createElement('p');qrHint.className='payment-muted';qrHint.textContent='Buka aplikasi mobile banking atau e-wallet yang mendukung QRIS, lalu scan kode ini dari perangkat lain. Jika memakai HP yang sama, simpan QR terlebih dahulu atau gunakan fitur impor gambar QR di aplikasi pembayaran jika tersedia.';qrPanel.appendChild(qrHint);
    let qrImage=null,qrArea=null;
-   if(data.qr_code_url){qrImage=document.createElement('img');qrImage.className='payment-qr-image';qrImage.src=String(data.qr_code_url);qrImage.alt='Kode QRIS pembayaran '+String(data.order_code||'');qrImage.onerror=()=>{qrImage?.classList.add('qr-image-error');};qrPanel.appendChild(qrImage);}
+   if(data.qr_code_url){
+    const qrUrl=String(data.qr_code_url);let qrRetries=0;
+    const qrLoading=document.createElement('p');qrLoading.className='payment-qr-loading';qrLoading.textContent='Memuat gambar QRIS…';qrPanel.appendChild(qrLoading);
+    qrImage=document.createElement('img');qrImage.className='payment-qr-image';qrImage.alt='Kode QRIS pembayaran '+String(data.order_code||'');qrImage.loading='eager';qrImage.decoding='async';
+    qrImage.onload=()=>{qrLoading.hidden=true;};
+    qrImage.onerror=()=>{
+     if(qrRetries<2){qrRetries++;qrLoading.hidden=false;qrLoading.textContent='Gambar QRIS belum termuat, mencoba lagi ('+qrRetries+'/2)…';const retryUrl=qrUrl;qrImage.removeAttribute('src');setTimeout(()=>{if(qrImage?.isConnected)qrImage.src=retryUrl;},700*qrRetries);}
+     else{qrLoading.hidden=false;qrLoading.textContent='Gambar QRIS gagal dimuat. Gunakan “Buka gambar QR” atau tombol coba lagi.';if(!qrPanel.querySelector('.payment-qr-retry')){const retry=document.createElement('button');retry.type='button';retry.className='btn payment-secondary payment-qr-retry';retry.textContent='Coba muat gambar lagi';retry.addEventListener('click',()=>{qrRetries=0;qrLoading.hidden=false;qrLoading.textContent='Memuat gambar QRIS…';qrImage.removeAttribute('src');setTimeout(()=>{if(qrImage?.isConnected)qrImage.src=qrUrl;},100);retry.remove();});qrPanel.appendChild(retry);}}
+    };
+    qrPanel.appendChild(qrImage);qrImage.src=qrUrl;
+   }
    else {const noQr=document.createElement('div');noQr.className='payment-qr-unavailable';noQr.textContent='Gambar QR belum tersedia dari penyedia pembayaran. Gunakan kode QRIS di bawah jika tersedia.';qrPanel.appendChild(noQr);}
    const qrActions=document.createElement('div');qrActions.className='payment-qr-actions';qrPanel.appendChild(qrActions);
    if(data.qr_code_url){const openImage=document.createElement('a');openImage.className='btn payment-secondary';openImage.href=String(data.qr_code_url);openImage.target='_blank';openImage.rel='noopener noreferrer';openImage.textContent='Buka gambar QR';qrActions.appendChild(openImage);}
