@@ -212,6 +212,30 @@ function openDetail(item){
    const note=document.createElement('p');note.className='payment-sandbox-note';note.textContent='Mode Sandbox untuk pengujian. Pesanan belum lunas sampai status pembayaran terverifikasi melalui notifikasi Midtrans. Jangan mengirim barang/top-up sebelum pembayaran berhasil.';summary.appendChild(note);
    const instructions=document.createElement('section');instructions.className='payment-instructions';instructions.innerHTML='<h3>Cara membayar</h3><ol><li>Buka aplikasi mobile banking atau e-wallet yang mendukung QRIS.</li><li>Pilih menu Scan QRIS dan arahkan ke kode di atas.</li><li>Pastikan nominal sesuai, lalu konfirmasi pembayaran di aplikasi.</li><li>Kembali ke halaman ini dan tunggu status pembayaran diverifikasi.</li></ol>';result.appendChild(instructions);
    const footer=document.createElement('div');footer.className='payment-footer';const help=document.createElement('p');help.textContent='Simpan nomor pesanan jika perlu mengecek transaksi nanti.';footer.appendChild(help);const close=document.createElement('button');close.type='button';close.className='btn checkout-submit payment-done';close.textContent='Selesai';close.addEventListener('click',()=>{modal.classList.remove('show')});footer.appendChild(close);result.appendChild(footer);modalText.appendChild(result);
+   // Periksa status order melalui RPC yang sudah digunakan halaman pelacakan.
+   // Tidak membaca tabel orders secara langsung dari browser.
+   let paymentCheckBusy=false;
+   const refreshPaymentStatus=async()=>{
+    if(paymentCheckBusy||!result.isConnected||!data.order_code||!wa)return;
+    paymentCheckBusy=true;
+    try{
+     const {data:rows,error:statusError}=await client.rpc('track_order',{p_order_code:String(data.order_code).trim().toUpperCase(),p_customer_whatsapp:String(wa).replace(/[^0-9]/g,'')});
+     if(statusError||!Array.isArray(rows)||!rows.length)return;
+     const order=rows[0];const current=String(order.status||order.payment_status||'pending').toLowerCase();
+     if(current==='paid'||current==='completed'){
+      status.innerHTML='<span class="payment-status-icon">✓</span><div><strong>Pembayaran Berhasil</strong><small>Pembayaran telah dikonfirmasi. Simpan kode pesanan untuk mengecek proses selanjutnya.</small></div>';
+      paymentStatus.querySelector('strong').textContent='BERHASIL';
+      if(!result.querySelector('.payment-success-message')){const success=document.createElement('p');success.className='payment-success-message';success.setAttribute('role','status');success.textContent='Pembayaran berhasil dikonfirmasi untuk pesanan '+String(data.order_code)+'.';success.style.cssText='padding:14px;border-radius:12px;background:#123b2c;color:#d7ffea;font-weight:700';result.insertBefore(success,layout);}
+      if(result.dataset.paymentTerminal!=='yes'){result.dataset.paymentTerminal='yes';if(paymentTimer)clearInterval(paymentTimer);}
+     }else if(current==='expired'||current==='cancelled'||current==='failed'){
+      const label=current==='expired'?'Pembayaran Kedaluwarsa':current==='cancelled'?'Pesanan Dibatalkan':'Pembayaran Gagal';
+      status.innerHTML='<span class="payment-status-icon">!</span><div><strong>'+label+'</strong><small>Silakan buat pesanan baru jika masih ingin melanjutkan.</small></div>';
+      paymentStatus.querySelector('strong').textContent=label.toUpperCase();
+      if(result.dataset.paymentTerminal!=='yes'){result.dataset.paymentTerminal='yes';if(paymentTimer)clearInterval(paymentTimer);}
+     }
+    }catch(err){console.warn('Pemeriksaan status pembayaran belum berhasil:',err)}finally{paymentCheckBusy=false;}
+   };
+   const paymentTimer=setInterval(refreshPaymentStatus,3000);refreshPaymentStatus();
   }catch(err){console.error('Checkout QRIS gagal:',err);alert('Gagal membuat tagihan QRIS: '+(err?.message||'Kesalahan tidak diketahui'));}
   finally{submitBtn.disabled=false;submitBtn.textContent='Buat Tagihan QRIS →';}
  });
@@ -226,7 +250,7 @@ function closeModal(){modal.classList.remove('show')}document.getElementById('cl
 (()=>{
  const CONFIG={url:'https://mexpeiaxzgxfchuegliu.supabase.co',anonKey:'sb_publishable_wSEcHIrwGRRZsZJS6pODPA_rjehi0Wf'};
  const ready=()=>CONFIG.url.startsWith('https://')&&!CONFIG.url.includes('PASTE_')&&CONFIG.anonKey&&!CONFIG.anonKey.includes('PASTE_')&&window.supabase?.createClient;
- const statusLabel={pending:'Menunggu konfirmasi',paid:'Pembayaran dikonfirmasi',processing:'Sedang diproses',completed:'Berhasil',cancelled:'Dibatalkan'};
+ const statusLabel={pending:'Menunggu konfirmasi',paid:'Pembayaran dikonfirmasi',processing:'Sedang diproses',completed:'Berhasil',expired:'Kedaluwarsa',failed:'Gagal',cancelled:'Dibatalkan'};
  const $=id=>document.getElementById(id); let client=null,session=null,isAdmin=false;
  if(ready()){client=window.supabase.createClient(CONFIG.url,CONFIG.anonKey);window.FANNSTORE_BACKEND={client};}else{window.FANNSTORE_BACKEND={client:null};}
  function notice(el,msg){if(el)el.textContent=msg}
