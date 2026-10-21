@@ -176,6 +176,8 @@ function openDetail(item){
    const {data,error}=await client.functions.invoke('create-payment',{body:{product_id:chosen.productId,quantity:qty,player_id:player,server_id:server,customer_email:inputs.email.value.trim(),customer_whatsapp:wa}});
    if(error){let detail=error.message||'Permintaan pembayaran gagal.';try{const context=error.context;if(context?.json){const j=await context.json();detail=j.detail||j.error||detail;}}catch{}throw new Error(detail);}
    if(!data||data.error)throw new Error(data?.detail||data?.error||'Tagihan QRIS tidak berhasil dibuat.');
+   // Simpan identitas pesanan di sesi browser agar status dapat dipulihkan setelah refresh.
+   try{sessionStorage.setItem('fannstore_last_qris_order',JSON.stringify({order_code:String(data.order_code||''),whatsapp:String(wa).replace(/[^0-9]/g,''),saved_at:Date.now()}));}catch(e){}
    modalTitle.textContent='Selesaikan Pembayaran';modalText.replaceChildren();
    const result=document.createElement('div');result.className='checkout-payment-page';
    const status=document.createElement('div');status.className='payment-status';status.innerHTML='<span class="payment-status-icon">◷</span><div><strong>Menunggu Pembayaran</strong><small>Selesaikan pembayaran sebelum batas waktu berakhir.</small></div>';result.appendChild(status);
@@ -327,6 +329,32 @@ $('voucherForm')?.addEventListener('submit',async e=>{e.preventDefault();const m
  if(cfg.url.startsWith('https://')&&!cfg.url.includes('PASTE_')&&cfg.publishableKey&&!cfg.publishableKey.includes('PASTE_')){authClient=window.supabase.createClient(cfg.url,cfg.publishableKey);authClient.auth.getSession().then(async ({data})=>{const user=data.session?.user||null;renderAccount(user);if(user)await loadUserRole(user);});authClient.auth.onAuthStateChange(async (_event,session)=>{const user=session?.user||null;renderAccount(user);if(user)await loadUserRole(user);});}
  $('fs-track-form').onsubmit=async e=>{e.preventDefault();if(!cfg.url.startsWith('https://')||cfg.url.includes('PASTE_')||!cfg.publishableKey||cfg.publishableKey.includes('PASTE_')){$('fs-track-result').textContent='Supabase belum dikonfigurasi. Isi URL project dan Publishable key.';return}try{const c=window.supabase.createClient(cfg.url,cfg.publishableKey);$('fs-track-result').textContent='Memeriksa status…';const {data,error}=await c.rpc('track_order',{p_order_code:$('fs-order-code').value.trim().toUpperCase(),p_customer_whatsapp:$('fs-order-wa').value.replace(/[^0-9]/g,'')});if(error)throw error;if(!data||!data.length){$('fs-track-result').textContent='Pesanan tidak ditemukan atau kode dan nomor WhatsApp tidak cocok.';return}const o=data[0],labels={pending:'Menunggu konfirmasi',paid:'Pembayaran dikonfirmasi',processing:'Sedang diproses',completed:'Berhasil',cancelled:'Dibatalkan'};$('fs-track-result').textContent=`Kode: ${o.order_code}\nGame: ${o.game}\nPaket: ${o.package_name}\nStatus: ${labels[o.status]||o.status}\nDibuat: ${o.created_at?new Date(o.created_at).toLocaleString('id-ID'):'—'}`;}catch(err){$('fs-track-result').textContent='Gagal memeriksa status: '+err.message+'. Pastikan fungsi database track_order tersedia.'}}
  document.querySelectorAll('a[href="#akun"]').forEach(a=>a.addEventListener('click',()=>setMode('login')));window.addEventListener('hashchange',showView);document.querySelectorAll('.fs-back').forEach(a=>a.addEventListener('click',()=>{location.hash='beranda'}));showView();
+})();
+</script>
+
+<script id="fannstore-payment-recovery">
+(()=>{
+ const key='fannstore_last_qris_order';
+ function start(){
+  let saved;try{saved=JSON.parse(sessionStorage.getItem(key)||'null')}catch{}
+  if(!saved?.order_code||!saved?.whatsapp||!window.supabase||!window.FANNSTORE_BACKEND?.client)return;
+  const client=window.FANNSTORE_BACKEND.client;
+  const overlay=document.createElement('div');overlay.id='fannstore-payment-recovery-view';
+  overlay.style.cssText='position:fixed;inset:0;z-index:100000;background:radial-gradient(ellipse at 85% 0%,#29205c 0,transparent 42%),#0b1022;color:#f7f7ff;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto';
+  const panel=document.createElement('section');panel.style.cssText='width:min(620px,100%);padding:clamp(22px,5vw,42px);border:1px solid #484080;border-radius:22px;background:#11152b;text-align:center;box-shadow:0 24px 80px #0008';overlay.appendChild(panel);
+  const mark=document.createElement('div');mark.textContent='◷';mark.style.cssText='width:76px;height:76px;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;background:#272044;color:#c8b8ff;font-size:38px';panel.appendChild(mark);
+  const heading=document.createElement('h1');heading.textContent='Memulihkan Status Pembayaran';heading.style.cssText='font-size:clamp(24px,5vw,34px);margin:0 0 12px';panel.appendChild(heading);
+  const message=document.createElement('p');message.textContent='Memeriksa status pesanan terakhir kamu dengan aman…';message.style.cssText='color:#c3cbe4;line-height:1.7';panel.appendChild(message);
+  const code=document.createElement('p');code.textContent='Kode pesanan: '+saved.order_code;code.style.cssText='padding:13px;background:#0b1022;border-radius:10px;overflow-wrap:anywhere;font-weight:800';panel.appendChild(code);
+  const actions=document.createElement('div');actions.style.cssText='display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px';panel.appendChild(actions);
+  const home=document.createElement('button');home.textContent='Kembali ke beranda';home.style.cssText='padding:12px 18px;border:1px solid #51427c;border-radius:11px;background:#201943;color:white;font-weight:700;cursor:pointer';home.onclick=()=>{overlay.remove()};actions.appendChild(home);
+  const check=document.createElement('button');check.textContent='Periksa lagi';check.style.cssText=home.style.cssText+';background:#4f46a5';check.onclick=()=>refresh();actions.appendChild(check);
+  document.body.appendChild(overlay);
+  let busy=false,terminal=false;
+  async function refresh(){if(busy)return;busy=true;check.disabled=true;try{const {data,error}=await client.rpc('track_order',{p_order_code:String(saved.order_code).trim().toUpperCase(),p_customer_whatsapp:String(saved.whatsapp).replace(/[^0-9]/g,'')});if(error)throw error;if(!Array.isArray(data)||!data.length)throw new Error('Pesanan belum dapat ditemukan. Coba periksa lagi atau gunakan menu Cek Status Pesanan.');const o=data[0],st=String(o.status||o.payment_status||'pending').toLowerCase();if(st==='paid'||st==='completed'||st==='processing'){mark.textContent='✓';mark.style.background='#123b2c';mark.style.color='#a7f3d0';heading.textContent='Pembayaran Berhasil!';message.textContent='Pembayaran untuk pesanan kamu sudah terkonfirmasi. Simpan kode pesanan ini untuk mengecek proses selanjutnya.';terminal=true;}else if(st==='expired'||st==='cancelled'||st==='failed'){mark.textContent='!';mark.style.background='#492127';mark.style.color='#fecaca';heading.textContent=st==='expired'?'Pembayaran Kedaluwarsa':st==='cancelled'?'Pesanan Dibatalkan':'Pembayaran Gagal';message.textContent='Status terakhir pesanan ini: '+st.toUpperCase()+'. Jika masih ingin membeli, kembali ke beranda dan buat pesanan baru.';terminal=true;}else{mark.textContent='◷';heading.textContent='Menunggu Pembayaran';message.textContent='Pembayaran belum terkonfirmasi. Halaman ini akan memeriksa kembali status pesanan secara otomatis.';}}catch(e){message.textContent='Status belum bisa diperiksa: '+e.message;}finally{busy=false;check.disabled=false;if(terminal)clearInterval(timer);}}
+  const timer=setInterval(refresh,4000);refresh();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 </script>
 
