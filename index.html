@@ -337,7 +337,7 @@ $('voucherForm')?.addEventListener('submit',async e=>{e.preventDefault();const m
  const key='fannstore_last_qris_order';
  function start(){
   let saved;try{saved=JSON.parse(sessionStorage.getItem(key)||'null')}catch{}
-  if(!saved?.order_code||!saved?.whatsapp||!window.supabase||!window.FANNSTORE_BACKEND?.client)return;
+  if(!saved?.order_code||!saved?.whatsapp||!window.FANNSTORE_BACKEND?.client)return;
   const client=window.FANNSTORE_BACKEND.client;
   const overlay=document.createElement('div');overlay.id='fannstore-payment-recovery-view';
   overlay.style.cssText='position:fixed;inset:0;z-index:100000;background:radial-gradient(ellipse at 85% 0%,#29205c 0,transparent 42%),#0b1022;color:#f7f7ff;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto';
