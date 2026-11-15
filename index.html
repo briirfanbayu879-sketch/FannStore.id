@@ -179,7 +179,10 @@ function openDetail(item){
   const submitBtn=finalActions.querySelector('button[type="submit"]');
   submitBtn.disabled=true;submitBtn.textContent='Membuat tagihan QRIS…';
   try{
-   const {data,error}=await client.functions.invoke('create-payment',{body:{product_id:chosen.productId,quantity:qty,player_id:player,server_id:server,customer_email:email||'',customer_whatsapp:wa||''}});
+   const {data:authData,error:authSessionError}=await client.auth.getSession();
+   if(authSessionError)throw authSessionError;
+   const accessToken=authData.session?.access_token;
+   const {data,error}=await client.functions.invoke('create-payment',{body:{product_id:chosen.productId,quantity:qty,player_id:player,server_id:server,customer_email:email||'',customer_whatsapp:wa||''},headers:accessToken?{Authorization:`Bearer ${accessToken}`}:{}});
    if(error){let detail=error.message||'Permintaan pembayaran gagal.';try{const context=error.context;if(context?.json){const j=await context.json();detail=j.detail||j.error||detail;}}catch{}throw new Error(detail);}
    if(!data||data.error)throw new Error(data?.detail||data?.error||'Tagihan QRIS tidak berhasil dibuat.');
    // Simpan identitas pesanan di sesi browser agar status dapat dipulihkan setelah refresh.
